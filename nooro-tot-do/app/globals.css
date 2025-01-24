@@ -19,3 +19,29 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.checkbox-as-radio {
+  @apply appearance-none w-5 h-5 rounded-full border-2 border-gray-300 bg-white relative;
+}
+
+/* Style for when the checkbox is checked */
+.checkbox-as-radio:checked {
+  @apply bg-transparent border-blue-500; /* Remove the background for checked state */
+}
+
+/* Create the checkmark icon using ::after */
+.checkbox-as-radio:checked::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  clip-path: polygon(14% 44%, 38% 68%, 84% 24%, 66% 6%, 38% 38%, 22% 22%); /* Checkmark shape */
+}
+
+.checkbox-as-radio:hover {
+  @apply border-blue-400;
+}

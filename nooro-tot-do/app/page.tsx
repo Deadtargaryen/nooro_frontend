@@ -1,12 +1,13 @@
-'use client'
+'use client' 
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import logo from "../public/logo.png";
 import clipboard from "../public/Clipboard.png";
 import PlusIcon from "./../components/ui/plus";
 import Button from "@/components/Button";
+import TrashIcon from "@/components/ui/trash";
 
 interface Task {
   id: string;
@@ -17,10 +18,12 @@ interface Task {
 
 const Home: React.FC = () => {
   const router = useRouter();
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: "1", title: "Integer urna interdum massa libero auctor neque turpis turpis semper. Duis vel sed fames integer.", color: "red", completed: false },
-    { id: "2", title: "Integer urna interdum massa libero auctor neque turpis turpis semper. Duis vel sed fames integer.", color: "blue", completed: true },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  useEffect(() => {
+    const storedTasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+    setTasks(storedTasks);
+  }, []);
 
   const handleCreateTask = () => {
     router.push("/tasks/create");
@@ -35,11 +38,13 @@ const Home: React.FC = () => {
   };
 
   const handleDeleteTask = (id: string) => {
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+    const updatedTasks = tasks.filter((task) => task.id !== id);
+    setTasks(updatedTasks);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks)); // Update localStorage
   };
 
   return (
-    <div className="bg-gray-900 text-gray-200 min-h-screen flex flex-col items-center py-8">
+    <div className="bg-black text-gray-200 min-h-screen flex flex-col items-center py-8">
       {/* Header */}
       <header className="text-center mb-6">
         <Image
@@ -48,21 +53,19 @@ const Home: React.FC = () => {
           width={150}
           height={150}
           alt="task-manager-logo"
-        ></Image>
+        />
       </header>
 
       {/* Create Task Button */}
-        <Button
-          text="Create Task"
-          onClick={handleCreateTask}
-          variant="primary"
-          className="mb-4 mt-12 w-[506px] z-10 relative"
-        >
-          <PlusIcon />
-        </Button>
-        
-      
-      
+      <Button
+        text="Create Task"
+        onClick={handleCreateTask}
+        variant="primary"
+        className="mb-4 mt-12 w-[506px] z-10 relative"
+      >
+        <PlusIcon />
+      </Button>
+
       {/* Task List */}
       <div className="mt-8 w-full max-w-2xl">
         {/* Tabs */}
@@ -91,12 +94,10 @@ const Home: React.FC = () => {
                     type="checkbox"
                     checked={task.completed}
                     onChange={() => toggleTaskCompletion(task.id)}
-                    className="h-5 w-5 mr-4"
+                    className="h-5 w-5 mr-4 checkbox-as-radio"
                   />
                   <span
-                    className={`text-sm ${
-                      task.completed ? "line-through text-gray-500" : ""
-                    }`}
+                    className={`text-sm ${task.completed ? "line-through text-gray-500" : ""}`}
                   >
                     {task.title}
                   </span>
@@ -105,7 +106,7 @@ const Home: React.FC = () => {
                   onClick={() => handleDeleteTask(task.id)}
                   className="text-red-500 hover:text-red-700"
                 >
-                  Delete
+                  <TrashIcon />
                 </button>
               </li>
             ))}
