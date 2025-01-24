@@ -25,14 +25,11 @@ const CreateTask: React.FC = () => {
         completed: false,
       };
 
-      // Retrieve tasks from localStorage and update
       const storedTasks = JSON.parse(localStorage.getItem("tasks") || "[]");
       const updatedTasks = [...storedTasks, newTask];
       
-      // Save updated tasks back to localStorage
       localStorage.setItem("tasks", JSON.stringify(updatedTasks));
 
-      // Redirect to Home page
       router.push("/");
     }
   };
