@@ -1,4 +1,4 @@
-'use client' 
+'use client';
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,7 @@ import TrashIcon from "@/components/ui/trash";
 import EditIcon from "@/components/ui/edit";
 
 interface Task {
-  id: string;
+  id: number;
   title: string;
   color: string;
   completed: boolean;
@@ -22,36 +22,68 @@ const Home: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
-    const storedTasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-    setTasks(storedTasks);
+    fetchTasks();
   }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch tasks");
+      }
+      const data = await response.json();
+      setTasks(data);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
 
   const handleCreateTask = () => {
     router.push("/tasks/create");
   };
 
-  const toggleTaskCompletion = (id: string) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    );
+  const toggleTaskCompletion = async (id: number, completed: boolean) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed: !completed }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update task");
+      }
+
+      fetchTasks();
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
   };
 
-  const handleDeleteTask = (id: string) => {
-    const updatedTasks = tasks.filter((task) => task.id !== id);
-    setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  const handleDeleteTask = async (id: number) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete task");
+      }
+
+      fetchTasks();
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
   };
 
-  const handleEditTask = (id: string) => {
+  const handleEditTask = (id: number) => {
     router.push(`/tasks/edit/${id}`);
   };
 
   return (
-    <div className="bg-black text-gray-200 min-h-screen flex flex-col items-center py-8">
+    <div className="flex flex-col items-center min-h-screen py-8 text-gray-200 bg-black">
       {/* Header */}
-      <header className="text-center mb-6">
+      <header className="mb-6 text-center">
         <Image
           src={logo}
           className="text-4xl text-white"
@@ -70,14 +102,14 @@ const Home: React.FC = () => {
         <PlusIcon />
       </Button>
 
-      <div className="mt-8 w-full max-w-2xl">
+      <div className="w-full max-w-2xl mt-8">
         <div className="flex justify-between px-4 py-2 text-sm border-b border-gray-700">
-          <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-transparent bg-clip-text font-semibold">
-            Tasks <span className="bg-gray-900 px-2 py-1 rounded-full text-white">{tasks.length}</span>
+          <span className="font-semibold text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text">
+            Tasks <span className="px-2 py-1 text-white bg-gray-900 rounded-full">{tasks.length}</span>
           </span>
-          <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-transparent bg-clip-text font-semibold">
-            Completed {" "}
-            <span className="bg-gray-900 px-2 py-1 rounded-full text-white">
+          <span className="font-semibold text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text">
+            Completed{" "}
+            <span className="px-2 py-1 text-white bg-gray-900 rounded-full">
               {tasks.filter((task) => task.completed).length} of {tasks.length}
             </span>
           </span>
@@ -88,14 +120,14 @@ const Home: React.FC = () => {
             {tasks.map((task) => (
               <li
                 key={task.id}
-                className="flex items-center justify-between px-4 py-2 bg-gray-800 rounded-lg mb-2"
+                className="flex items-center justify-between px-4 py-2 mb-2 bg-gray-800 rounded-lg"
               >
                 <div className="flex items-center">
                   <input
                     type="checkbox"
                     checked={task.completed}
-                    onChange={() => toggleTaskCompletion(task.id)}
-                    className="h-5 w-5 mr-4 checkbox-as-radio"
+                    onChange={() => toggleTaskCompletion(task.id, task.completed)}
+                    className="w-5 h-5 mr-4 checkbox-as-radio"
                   />
                   <span
                     className={`text-sm ${task.completed ? "line-through text-gray-500" : ""}`}
@@ -104,12 +136,12 @@ const Home: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handleEditTask(task.id)}
-                      className="text-blue-500 hover:text-blue-700"
-                    >
-                      <EditIcon className="text-gray-600" />
-                    </button>
+                  <button
+                    onClick={() => handleEditTask(task.id)}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    <EditIcon className="text-gray-600" />
+                  </button>
                   <button
                     onClick={() => handleDeleteTask(task.id)}
                     className="text-red-500 hover:text-red-700"
@@ -121,7 +153,7 @@ const Home: React.FC = () => {
             ))}
           </ul>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+          <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
             <Image
               className="mb-4"
               src={clipboard}
