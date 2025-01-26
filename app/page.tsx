@@ -8,6 +8,7 @@ import clipboard from "../public/Clipboard.png";
 import PlusIcon from "./../components/ui/plus";
 import Button from "@/components/Button";
 import TrashIcon from "@/components/ui/trash";
+import EditIcon from "@/components/ui/edit";
 
 interface Task {
   id: string;
@@ -40,7 +41,11 @@ const Home: React.FC = () => {
   const handleDeleteTask = (id: string) => {
     const updatedTasks = tasks.filter((task) => task.id !== id);
     setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks)); // Update localStorage
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  };
+
+  const handleEditTask = (id: string) => {
+    router.push(`/tasks/edit/${id}`);
   };
 
   return (
@@ -56,7 +61,6 @@ const Home: React.FC = () => {
         />
       </header>
 
-      {/* Create Task Button */}
       <Button
         text="Create Task"
         onClick={handleCreateTask}
@@ -66,9 +70,7 @@ const Home: React.FC = () => {
         <PlusIcon />
       </Button>
 
-      {/* Task List */}
       <div className="mt-8 w-full max-w-2xl">
-        {/* Tabs */}
         <div className="flex justify-between px-4 py-2 text-sm border-b border-gray-700">
           <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-transparent bg-clip-text font-semibold">
             Tasks <span className="bg-gray-900 px-2 py-1 rounded-full text-white">{tasks.length}</span>
@@ -81,7 +83,6 @@ const Home: React.FC = () => {
           </span>
         </div>
 
-        {/* Task Items */}
         {tasks.length > 0 ? (
           <ul className="mt-4">
             {tasks.map((task) => (
@@ -102,12 +103,20 @@ const Home: React.FC = () => {
                     {task.title}
                   </span>
                 </div>
-                <button
-                  onClick={() => handleDeleteTask(task.id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <TrashIcon />
-                </button>
+                <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handleEditTask(task.id)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <EditIcon className="text-gray-600" />
+                    </button>
+                  <button
+                    onClick={() => handleDeleteTask(task.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

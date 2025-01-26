@@ -1,33 +1,49 @@
 'use client'
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import BackIcon from "@/components/ui/back";
+import TickIcon from "@/components/ui/tick";
 import logo from "@/public/logo.png";
 import Button from "@/components/Button";
 
-const CreateTask: React.FC = () => {
+const EditTask: React.FC = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const taskId = searchParams ? searchParams.get("id") : null;
+
   const [taskTitle, setTaskTitle] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+
+  useEffect(() => {
+    if (taskId) {
+      // Fetch the task data from local storage
+      const storedTasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+      const taskToEdit = storedTasks.find((task: { id: string }) => task.id === taskId);
+
+      if (taskToEdit) {
+        setTaskTitle(taskToEdit.title);
+        setSelectedColor(taskToEdit.color);
+      } else {
+        router.push("/");
+      }
+    }
+  }, [taskId, router]);
 
   const handleBack = () => {
     router.push("/");
   };
 
-  const handleAddTask = () => {
-    if (taskTitle && selectedColor) {
-      const newTask = {
-        id: new Date().toISOString(),
-        title: taskTitle,
-        color: selectedColor,
-        completed: false,
-      };
-
+  const handleSaveTask = () => {
+    if (taskId && taskTitle && selectedColor) {
       const storedTasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-      const updatedTasks = [...storedTasks, newTask];
-      
+
+      // Update the task
+      const updatedTasks = storedTasks.map((task: { id: string }) =>
+        task.id === taskId ? { ...task, title: taskTitle, color: selectedColor } : task
+      );
+
       localStorage.setItem("tasks", JSON.stringify(updatedTasks));
 
       router.push("/");
@@ -35,9 +51,9 @@ const CreateTask: React.FC = () => {
   };
 
   return (
-    <div className="bg-black text-gray-200 min-h-screen flex flex-col items-center py-8 px-4">
+    <div className="flex flex-col items-center min-h-screen px-4 py-8 text-gray-200 bg-black">
       {/* Header */}
-      <header className="text-center mb-6">
+      <header className="mb-6 text-center">
         <Image
           src={logo}
           className="text-4xl text-white"
@@ -49,14 +65,14 @@ const CreateTask: React.FC = () => {
       <div className="relative w-full max-w-2xl mb-6">
         <button
           onClick={handleBack}
-          className="absolute left-0 top-0 text-white flex items-center"
+          className="absolute top-0 left-0 flex items-center text-white"
         >
           <BackIcon />
         </button>
       </div>
 
       {/* Form */}
-      <div className="w-full max-w-2xl flex flex-col gap-6">
+      <div className="flex flex-col w-full max-w-2xl gap-6">
         <div className="mt-8">
           <label htmlFor="task-title" className="block text-sm mb-2 text-[#4EA8DE]">
             Title
@@ -67,7 +83,7 @@ const CreateTask: React.FC = () => {
             placeholder="Ex. Brush your teeth"
             value={taskTitle}
             onChange={(e) => setTaskTitle(e.target.value)}
-            className="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 text-gray-200 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -86,14 +102,16 @@ const CreateTask: React.FC = () => {
         </div>
 
         <Button
-          text="Add Task"
-          onClick={handleAddTask}
+          text="Save"
+          onClick={handleSaveTask}
           variant="primary"
-          className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 flex justify-center items-center gap-2"
-        />
+          className="flex items-center justify-center w-full gap-2 py-2 text-white rounded-lg hover:bg-blue-600"
+        >
+          <TickIcon />
+        </Button>
       </div>
     </div>
   );
 };
 
-export default CreateTask;
+export default EditTask;
