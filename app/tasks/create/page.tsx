@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -21,7 +23,7 @@ const CreateTask: React.FC = () => {
         title: taskTitle,
         color: selectedColor,
       };
-
+  
       try {
         // Make a POST request to the backend to create the task
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks`, {
@@ -31,15 +33,14 @@ const CreateTask: React.FC = () => {
           },
           body: JSON.stringify(newTask),
         });
-
+  
+        const responseData = await response.json(); // Consume response once
+  
         if (response.ok) {
-          const createdTask = await response.json();
-          // After successfully adding the task, navigate back to the main page
-          router.push("/");
+          router.push("/"); // Redirect on successful task creation
         } else {
           // Handle error (e.g., validation errors, server error)
-          const errorData = await response.json();
-          alert(errorData.error || "Failed to add task. Please try again.");
+          alert(responseData.error || "Failed to add task. Please try again.");
         }
       } catch (error) {
         console.error("Error adding task:", error);
@@ -49,6 +50,7 @@ const CreateTask: React.FC = () => {
       alert("Please provide a task title and color.");
     }
   };
+  
 
   return (
     <div className="flex flex-col items-center min-h-screen px-4 py-8 text-gray-200 bg-black">

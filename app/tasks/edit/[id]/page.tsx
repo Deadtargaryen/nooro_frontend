@@ -15,19 +15,22 @@ const EditTask: React.FC = () => {
 
   const [taskTitle, setTaskTitle] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (taskId) {
-      // Fetch the task data from local storage
-      const storedTasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-      const taskToEdit = storedTasks.find((task: { id: string }) => task.id === taskId);
-
-      if (taskToEdit) {
-        setTaskTitle(taskToEdit.title);
-        setSelectedColor(taskToEdit.color);
-      } else {
-        router.push("/");
-      }
+      setLoading(true);
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/${taskId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          setTaskTitle(data.title);
+          setSelectedColor(data.color);
+        })
+        .catch((error) => {
+          console.error("Error fetching task:", error);
+          router.push("/");
+        })
+        .finally(() => setLoading(false));
     }
   }, [taskId, router]);
 
@@ -35,20 +38,43 @@ const EditTask: React.FC = () => {
     router.push("/");
   };
 
-  const handleSaveTask = () => {
+  const handleSaveTask = async () => {
     if (taskId && taskTitle && selectedColor) {
-      const storedTasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+      setLoading(true);
+      const updatedTask = {
+        title: taskTitle,
+        color: selectedColor,
+      };
 
-      // Update the task
-      const updatedTasks = storedTasks.map((task: { id: string }) =>
-        task.id === taskId ? { ...task, title: taskTitle, color: selectedColor } : task
-      );
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/${taskId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedTask),
+        });
 
-      localStorage.setItem("tasks", JSON.stringify(updatedTasks));
-
-      router.push("/");
+        if (response.ok) {
+          router.push("/");
+        } else {
+          const errorData = await response.json();
+          alert(errorData.error || "Failed to update task. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error saving task:", error);
+        alert("Error saving task. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      alert("Please provide a task title and color.");
     }
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col items-center min-h-screen px-4 py-8 text-gray-200 bg-black">
