@@ -114,8 +114,3 @@ The color you select will be used to visually categorize the task.
 5. Commit your changes: `git commit -am 'Add new feature'`.
 6. Push to the branch: `git push origin my-new-feature`.
 7. Create a pull request.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-```
