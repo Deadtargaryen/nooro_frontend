@@ -1,6 +1,3 @@
-Understood! Here's the `README.md` tailored for the already connected frontend (based on the modified snippets provided), assuming that the frontend is now connected and ready for use:
-
-```markdown
 # Task Manager Frontend
 
 This is the frontend for the Task Manager application. The app allows users to create, edit, and manage tasks, with features like custom task titles, color coding, and data persistence using `localStorage` & `mySQL` via Prisma CLI.
