@@ -15,7 +15,6 @@ const EditTask: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Fetch task data
   useEffect(() => {
     if (!taskId) {
       console.error("Invalid task ID");
@@ -33,7 +32,7 @@ const EditTask: React.FC = () => {
         setSelectedColor(data.color);
       } catch (error) {
         console.error("Error fetching task:", error);
-        router.push("/"); // Redirect on error
+        router.push("/");
       } finally {
         setLoading(false);
       }
@@ -132,7 +131,7 @@ const EditTask: React.FC = () => {
                 key={color}
                 onClick={() => setSelectedColor(color)}
                 className={`w-10 h-10 rounded-full ${
-                  selectedColor === color ? "ring-4 ring-blue-500" : ""
+                  selectedColor === color ? "ring-4 ring-white" : ""
                 }`}
                 style={{ backgroundColor: color }}
               ></button>

@@ -10,13 +10,6 @@ import Button from "@/components/Button";
 import TrashIcon from "@/components/ui/trash";
 import EditIcon from "@/components/ui/edit";
 
-interface Task {
-  id: number;
-  title: string;
-  color: string;
-  completed: boolean;
-}
-
 const Home: React.FC = () => {
   const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
